@@ -11,6 +11,7 @@ from anomaly_synth import make_split  # noqa: E402
 from anomaly_synth.generator import ORACLE_COLUMNS  # noqa: E402
 from baselines import DETECTOR_COLUMNS  # noqa: E402
 from real_data import REAL_DIR, WEATHER_MAP, load_real  # noqa: E402
+from run_inject import Scorer  # noqa: E402
 from run_phase6 import OUT, mad, real_residuals  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -69,6 +70,42 @@ class TestResidualsOnDummy(unittest.TestCase):
             self.assertIn(c, r.columns)
         out = make_split("val", 1)["anomaly_type"] == "outage"
         self.assertGreater(r.loc[out, "z_rel"].min(), 3)
+
+
+class TestInject(unittest.TestCase):
+    """注入実験の部品。実データの代わりに合成データ（異常なし）で動作を確かめる"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.df = make_split("train", 1, gsr_noise=0.2)[DETECTOR_COLUMNS]  # 実データ並みにノイズを大きくした正常系列
+        cls.sc = Scorer(cls.df)
+
+    def test_注入前の警報率は目標付近(self):
+        for kind in ("rel", "z"):
+            self.assertLess(self.sc.alarm(self.sc.y, kind).mean(), 0.08, kind)
+
+    def test_水準別の標準化は水準ごとに中央値が0付近(self):
+        z = self.sc.score(self.sc.y, "z")
+        for k in range(5):
+            m = self.sc.level == k
+            if m.sum() >= 20:
+                self.assertLess(abs(np.median(z[m])), 0.3, k)
+
+    def test_強い影は検知できる(self):
+        y = self.sc.y.copy(); y[100:105] *= 0.2
+        for kind in ("rel", "z"):
+            self.assertTrue(self.sc.alarm(y, kind)[100:105].any(), kind)
+
+    def test_注入は元の系列を書き換えない(self):
+        y0 = self.sc.y.copy()
+        yy = self.sc.y.copy(); yy[10:15] *= 0.5
+        self.assertTrue(np.array_equal(self.sc.y, y0))
+
+    def test_しきい値は注入前のデータだけで決まる(self):
+        thr = dict(self.sc.thr)
+        y = self.sc.y.copy(); y[50:60] = 0
+        self.sc.alarm(y, "rel")
+        self.assertEqual(thr, self.sc.thr)
 
 
 if __name__ == "__main__":

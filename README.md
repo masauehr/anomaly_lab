@@ -49,6 +49,7 @@ python3 -m venv .venv && .venv/bin/pip install numpy pandas scikit-learn matplot
 .venv/bin/python src/run_phase5.py               # 組み合わせ・劣化の検知限界・影の感度分析
 .venv/bin/python src/final_eval.py --split val   # 最終評価の予行演習（testは使用済み）
 .venv/bin/python src/run_phase6.py               # 実データ（自宅・手元のみ）。ml_forecast/data を読み取り専用で参照。結果は outputs/real/（git管理外）
+.venv/bin/python src/run_inject.py               # 実データに合成の異常を注入して検知限界を測る（手元のみ）
 ```
 
 Notebook は `notebooks/`（カーネル名「Python (anomaly_lab)」）。
