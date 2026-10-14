@@ -36,7 +36,7 @@
 
 ## 現状
 
-**Phase0（合成データ生成器）・Phase1（非AIのベースライン）・Phase2（天気から期待発電量を予測し、残差で検知）完了。** 次は Phase3（教師なし手法）。進め方は [PLAN.md](PLAN.md)。
+**Phase0（合成データ生成器）・Phase1（非AIのベースライン）・Phase2（天気から期待発電量を予測し、残差で検知）・Phase3（教師なし手法 Isolation Forest/LOF）完了。** 次は Phase4（オートエンコーダ。PyTorch導入の確認が必要）。進め方は [PLAN.md](PLAN.md)。
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install numpy pandas scikit-learn matplotlib ipykernel
@@ -44,6 +44,7 @@ python3 -m venv .venv && .venv/bin/pip install numpy pandas scikit-learn matplot
 .venv/bin/python src/make_data.py                # data/*.csv と outputs/phase0_series.png を作る
 .venv/bin/python src/run_phase1.py               # ベースライン4つ+素朴ルールの評価
 .venv/bin/python src/run_phase2.py               # 残差法6つ（期待値モデル3種×平滑化2種）の評価
+.venv/bin/python src/run_phase3.py               # 教師なし6つ（IF/LOF×特徴量A/B/C）の評価
 ```
 
 Notebook は `notebooks/`（カーネル名「Python (anomaly_lab)」）。
