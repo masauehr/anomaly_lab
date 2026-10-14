@@ -36,4 +36,12 @@
 
 ## 現状
 
-md整備のみ（Phase0 未着手）。進め方は [PLAN.md](PLAN.md)。
+**Phase0（合成データ生成器・テスト・Notebook00）完了。** 次は Phase1（非AIのベースライン）。進め方は [PLAN.md](PLAN.md)。
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install numpy pandas scikit-learn matplotlib ipykernel
+.venv/bin/python -m unittest discover -s tests   # テスト
+.venv/bin/python src/make_data.py                # data/*.csv と outputs/phase0_series.png を作る
+```
+
+Notebook は `notebooks/`（カーネル名「Python (anomaly_lab)」）。
