@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# 生成データ・結果は再現可能なため管理外（コードとmdだけを管理する）
+data/*
+outputs/*
+!data/.gitkeep
+!outputs/.gitkeep
+
+# 実データ（自宅の発電量など個人データ）は絶対にコミットしない
+data/real/
+*.sqlite
+*.db
+.env
