@@ -81,10 +81,12 @@ def _free_start(rng, occupied: np.ndarray, length: int, margin: int = 5, tries: 
     raise RuntimeError("異常を置く空きが見つからない（イベント数が多すぎる）")
 
 
-def inject_anomalies(df: pd.DataFrame, seed: int, events: dict | None = None) -> pd.DataFrame:
+def inject_anomalies(df: pd.DataFrame, seed: int, events: dict | None = None,
+                     degrade_depth: tuple = (0.05, 0.15), shade_factor: tuple = (0.6, 0.8)) -> pd.DataFrame:
     """正常系列に異常を注入して返す（元のdfは変更しない）。
 
     注入の乱数は正常系列とは別のrng（seed）で動かすため、同じ正常系列に別の異常を重ねられる。
+    degrade_depth=劣化の最終的な低下率の範囲、shade_factor=影の日の発電量の割合の範囲（感度分析で変える）。
     """
     events = DEFAULT_EVENTS if events is None else events
     out = df.copy()
@@ -115,12 +117,12 @@ def inject_anomalies(df: pd.DataFrame, seed: int, events: dict | None = None) ->
                 gen[sl] = clean[sl] * rng.uniform(0.0, 0.1, length)
                 mark = np.ones(length, dtype=bool)
             elif kind == "degrade":
-                depth = rng.uniform(0.05, 0.15)  # 最終的な低下率
+                depth = rng.uniform(*degrade_depth)  # 最終的な低下率
                 loss = depth * np.arange(1, length + 1) / length  # 直線的に悪化
                 mark = loss >= 0.02  # 低下が2%に満たない序盤は「異常日」に数えない（値も変えない）
                 gen[sl] = np.where(mark, clean[sl] * (1 - loss), gen[sl])
             elif kind == "shade":
-                gen[sl] = clean[sl] * rng.uniform(0.6, 0.8)
+                gen[sl] = clean[sl] * rng.uniform(*shade_factor)
                 mark = np.ones(length, dtype=bool)
             else:  # stuck: 開始前日の値で固着する（共変量は動き続ける）
                 gen[sl] = gen[s - 1]
@@ -138,7 +140,7 @@ def inject_anomalies(df: pd.DataFrame, seed: int, events: dict | None = None) ->
     return out
 
 
-def make_split(split: str, index: int = 0, events: dict | None = None) -> pd.DataFrame:
+def make_split(split: str, index: int = 0, events: dict | None = None, **inject_kwargs) -> pd.DataFrame:
     """分割（train/val/test）のデータを作る。index は同じ分割内の別系列（split_seed = 基準 + index）。
 
     train は正常のみ（異常を注入しない）。index が 1000 以上のtest系列は「testの追加系列」として使える。
@@ -148,4 +150,4 @@ def make_split(split: str, index: int = 0, events: dict | None = None) -> pd.Dat
     if split == "train":
         return df
     # 異常注入用のシードは、正常系列とは別の流れにする（+500_000）
-    return inject_anomalies(df, seed + 500_000, events)
+    return inject_anomalies(df, seed + 500_000, events, **inject_kwargs)

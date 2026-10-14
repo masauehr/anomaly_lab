@@ -36,7 +36,7 @@
 
 ## 現状
 
-**Phase0（合成データ生成器）・Phase1（非AIのベースライン）・Phase2（天気から期待発電量を予測し、残差で検知）・Phase3（教師なし手法 Isolation Forest/LOF）・Phase4（オートエンコーダ）完了。** 次は Phase5（組み合わせ・検知限界・最終評価）。進め方は [PLAN.md](PLAN.md)。
+**Phase0（合成データ生成器）・Phase1（非AIのベースライン）・Phase2（天気から期待発電量を予測し、残差で検知）・Phase3（教師なし手法 Isolation Forest/LOF）・Phase4（オートエンコーダ）・Phase5（組み合わせ・検知限界・最終評価）完了。** 最終レポートは [REPORT.md](REPORT.md)。次は Phase6（自宅の実データへの適用。手元のみ・コミットしない）。進め方は [PLAN.md](PLAN.md)。
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install numpy pandas scikit-learn matplotlib ipykernel torch
@@ -46,6 +46,8 @@ python3 -m venv .venv && .venv/bin/pip install numpy pandas scikit-learn matplot
 .venv/bin/python src/run_phase2.py               # 残差法6つ（期待値モデル3種×平滑化2種）の評価
 .venv/bin/python src/run_phase3.py               # 教師なし6つ（IF/LOF×特徴量A/B/C）の評価
 .venv/bin/python src/run_phase4.py               # オートエンコーダ6つ（窓・code・汚染）×3シードの評価
+.venv/bin/python src/run_phase5.py               # 組み合わせ・劣化の検知限界・影の感度分析
+.venv/bin/python src/final_eval.py --split val   # 最終評価の予行演習（testは使用済み）
 ```
 
 Notebook は `notebooks/`（カーネル名「Python (anomaly_lab)」）。
