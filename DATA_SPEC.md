@@ -43,5 +43,9 @@
 
 `index` を変えると、同じ分割の別系列ができる（複数系列での評価用）。testの追加系列は index≥1000 を使う。
 
+## 感度分析用の引数（Phase5・6で追加）
+- `degrade_depth`（劣化の最終低下率の範囲）、`shade_factor`（影の日の発電量の割合の範囲）、`gsr_noise`（日射の計測誤差の割合。既定0.04）。既定値は従来と同じデータになる（テストで確認）。
+
 ## 実データ（Phase6）
-- 自宅の日次発電量（`ml_forecast/data/hatuden_daily.csv`、`hatuden_amd.csv`）。**読み取り専用で参照し、コピー・コミットしない**。
+- 自宅の日次発電量（`ml_forecast/data/hatuden_daily.csv`、`hatuden_amd.csv`）。**読み取り専用で参照し、コピー・コミットしない**。変換は [src/real_data.py](src/real_data.py)（天気分類を 0=晴 1=曇 2=雨 に、日照率の%を0〜1に）。
+- 結果（候補の日付・個別の値・図）は `outputs/real/`（git管理外）にだけ書く。

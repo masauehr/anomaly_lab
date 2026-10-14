@@ -48,6 +48,13 @@ class TestSensitivityParams(unittest.TestCase):
         b = make_split("val", 3, degrade_depth=(0.05, 0.15), shade_factor=(0.6, 0.8))
         self.assertTrue(a.equals(b))
 
+    def test_日射の計測誤差の既定値は従来と同じ(self):
+        a = make_split("val", 3)
+        self.assertTrue(a.equals(make_split("val", 3, gsr_noise=0.04)))
+        noisy = make_split("val", 3, gsr_noise=0.2)
+        self.assertTrue(a["gen_kwh"].equals(noisy["gen_kwh"]))  # 発電量は変わらない
+        self.assertFalse(a["gsr"].equals(noisy["gsr"]))          # 日射量の計測だけが荒くなる
+
     def test_影の強さを指定できる(self):
         df = make_split("val", 3, events={"shade": 2}, shade_factor=(0.9, 0.9))
         s = df[df["anomaly_type"] == "shade"]

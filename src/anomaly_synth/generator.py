@@ -25,8 +25,11 @@ ORACLE_COLUMNS = ["gen_clean_kwh", "is_anomaly", "anomaly_type", "anomaly_id"]
 KWH_PER_MJ = 0.85  # 日射量(MJ/m2)から発電量(kWh)への換算係数（約4.5kWpのシステムを想定）
 
 
-def generate_normal(start: str, n_days: int, seed: int) -> pd.DataFrame:
-    """正常な日次系列を作る。天気は晴/曇/雨のマルコフ連鎖、季節は正弦波。"""
+def generate_normal(start: str, n_days: int, seed: int, gsr_noise: float = 0.04) -> pd.DataFrame:
+    """正常な日次系列を作る。天気は晴/曇/雨のマルコフ連鎖、季節は正弦波。
+
+    gsr_noise は日射量の計測誤差（割合）。実データ並みに大きくして、検知限界の変化を調べるときに使う。
+    """
     rng = np.random.default_rng(seed)
     dates = pd.date_range(start, periods=n_days, freq="D")
     doy = dates.dayofyear.to_numpy()
@@ -54,7 +57,7 @@ def generate_normal(start: str, n_days: int, seed: int) -> pd.DataFrame:
     gsr_true = clear_gsr * ratio
     gen = KWH_PER_MJ * gsr_true * (1 + 0.03 * rng.standard_normal(n_days))
     # 検知器が見る共変量は計測誤差を含む
-    gsr_obs = gsr_true * (1 + 0.04 * rng.standard_normal(n_days))
+    gsr_obs = gsr_true * (1 + gsr_noise * rng.standard_normal(n_days))
     sunshine = np.clip(ratio + 0.05 * rng.standard_normal(n_days), 0, 1)
 
     return pd.DataFrame({
@@ -140,13 +143,14 @@ def inject_anomalies(df: pd.DataFrame, seed: int, events: dict | None = None,
     return out
 
 
-def make_split(split: str, index: int = 0, events: dict | None = None, **inject_kwargs) -> pd.DataFrame:
+def make_split(split: str, index: int = 0, events: dict | None = None, gsr_noise: float = 0.04,
+               **inject_kwargs) -> pd.DataFrame:
     """分割（train/val/test）のデータを作る。index は同じ分割内の別系列（split_seed = 基準 + index）。
 
     train は正常のみ（異常を注入しない）。index が 1000 以上のtest系列は「testの追加系列」として使える。
     """
     seed = SPLIT_BASE[split] + index
-    df = generate_normal(SPLIT_START[split], SPLIT_DAYS[split], seed)
+    df = generate_normal(SPLIT_START[split], SPLIT_DAYS[split], seed, gsr_noise)
     if split == "train":
         return df
     # 異常注入用のシードは、正常系列とは別の流れにする（+500_000）
