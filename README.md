@@ -3,7 +3,8 @@
 **異常検知**を、太陽光発電量（日次）の時系列を題材に学ぶプロジェクト。
 「いつもと違う」をどう定義し、どう見つけ、**どれだけ当たったかをどう検証するか**を、小さなシステムとして組み立てる。
 
-詳しくは [MANUAL.md](MANUAL.md) / [DATA_SPEC.md](DATA_SPEC.md) / [EVALUATION.md](EVALUATION.md) / [PLAN.md](PLAN.md) を参照。pc_docs運用マニュアルのコピーは [anomaly-lab.md](anomaly-lab.md)。
+詳しくは [MANUAL.md](MANUAL.md) / [DATA_SPEC.md](DATA_SPEC.md) / [EVALUATION.md](EVALUATION.md) / [PLAN.md](PLAN.md) を参照。
+各Notebookの**実行結果（図・表・読み取れること）のまとめ**は [notebooks/README.md](notebooks/README.md) にある（Notebookを開く前の予習・実行後の答え合わせに使える）。pc_docs運用マニュアルのコピーは [anomaly-lab.md](anomaly-lab.md)。
 
 > 🔒 **学習は合成データだけで行う**（公開リポジトリ向け）。自宅の発電量など**実データは手元のみで適用**し、
 > 生データ・結果の画像はコミットしない。詳しくは [CLAUDE.md](CLAUDE.md) を参照。
