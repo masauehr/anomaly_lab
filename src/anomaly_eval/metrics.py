@@ -16,11 +16,19 @@ def alarm_by_normal_quantile(normal_scores, rate: float) -> float:
     return float(np.quantile(np.asarray(normal_scores, dtype=float), 1.0 - rate))
 
 
-def false_alarms_per_month(df: pd.DataFrame, alarm: np.ndarray) -> float:
-    """正常日に出た警報の件数を、30日あたりに換算する。"""
+def false_alarms_per_month(df: pd.DataFrame, alarm: np.ndarray, grace: int = 0) -> float:
+    """正常日に出た警報の件数を、30日あたりに換算する。
+
+    grace>0 なら、異常日の直後 grace 日以内の正常日は数えない（分母からも除く）。
+    平滑化（直近の平均）を使う検知器は、異常が終わった後も数日警報が居残る。
+    それを「余韻」として誤警報から分けて見るための設定。
+    """
+    alarm = np.asarray(alarm, dtype=bool)
     normal = (df["is_anomaly"] == 0).to_numpy()
-    n_false = int((np.asarray(alarm, dtype=bool) & normal).sum())
-    return n_false / normal.sum() * 30.0
+    if grace > 0:
+        recent = pd.Series(~normal).rolling(grace, min_periods=1).max().shift(1).fillna(0).to_numpy() == 1
+        normal = normal & ~recent
+    return int((alarm & normal).sum()) / normal.sum() * 30.0
 
 
 def auprc(df: pd.DataFrame, score) -> float:

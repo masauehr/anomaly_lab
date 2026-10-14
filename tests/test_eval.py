@@ -34,6 +34,15 @@ class TestMetrics(unittest.TestCase):
         alarm = np.array([1, 0, 1, 0, 0, 0, 0, 0, 0, 0], dtype=bool)  # 正常日1回、異常日1回
         self.assertAlmostEqual(false_alarms_per_month(toy(), alarm), 1 / 7 * 30)
 
+    def test_余韻の猶予日数(self):
+        # 異常は3,4日目(index2,3)と8日目(index7)。直後2日以内の正常日(index4,5,8,9)は数えない
+        alarm = np.array([0, 0, 0, 0, 1, 1, 0, 0, 1, 0], dtype=bool)
+        self.assertAlmostEqual(false_alarms_per_month(toy(), alarm, grace=0), 3 / 7 * 30)
+        self.assertAlmostEqual(false_alarms_per_month(toy(), alarm, grace=2), 0.0)
+        # 猶予の外（index6の次の日など）の警報は数える
+        alarm2 = np.array([0, 0, 0, 0, 0, 0, 1, 0, 0, 0], dtype=bool)
+        self.assertAlmostEqual(false_alarms_per_month(toy(), alarm2, grace=2), 1 / 3 * 30)
+
     def test_分位点しきい値(self):
         scores = np.arange(100)
         thr = alarm_by_normal_quantile(scores, 0.1)
