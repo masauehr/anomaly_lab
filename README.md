@@ -54,3 +54,6 @@ python3 -m venv .venv && .venv/bin/pip install numpy pandas scikit-learn matplot
 ```
 
 Notebook は `notebooks/`（カーネル名「Python (anomaly_lab)」）。
+
+## Notebook を読むとき
+はじめての方は、まず [notebooks/00_basics.ipynb](notebooks/00_basics.ipynb)（基礎知識・用語集・読む順）から。各Notebookの冒頭には「やさしい導入」があります。
